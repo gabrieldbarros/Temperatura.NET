@@ -1,0 +1,98 @@
+﻿@model Temperatura.Models.Dados
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>Temperatura</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+
+    <script>
+        $(function () {
+            $("#btnEnviar").click(function () {
+                $.ajax({
+                    url: '@Url.Action("Pesquisar","Home")',
+                    type: "GET",
+                    data: { dataIni: $("#dataIni").val(), dataFim: $("#dataFim").val() },
+                    success: function (result) {
+                        $("#tableBody").html(result);
+                    },
+                    error: function () {
+                        alert("Falha de comunicação!");
+                    }
+                });
+            });
+
+        });
+    </script>
+
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>Temperatura da Cidade de @Html.Raw(Model.CityName)</h1>
+        <hr />
+        <div class="row justify-content-center">
+            <div class="col-md-2">
+                <label class="form-label" for="dataIni">Data Inicial</label>
+                <input type="date" id="dataIni" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="dataFim">Data Final</label>
+                <input type="date" id="dataFim" class="form-control" />
+            </div>
+            <div class="col-md-1 pt-4">
+                <button type="button" id="btnEnviar" class="form-control btn btn-primary mt-2">Filtrar</button>
+            </div>
+        </div>
+
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Máximo</th>
+                    <th>Mínimo</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+
+                @if (Model.Resultados != null && Model.Resultados.Count > 0)
+                {
+                    for (var i = 0; i < Model.Resultados.Count; i++)
+                    {
+                        @* Resolvido assim pois durante algumas execuções a API retornava menos que 7 valores *@
+                        if (i == 7)
+                        {
+                            break;
+                        }
+
+                        <tr>
+                            <td>@Html.Raw(Model.Resultados[i].Date)</td>
+                            <td>@Html.Raw(Model.Resultados[i].Max)</td>
+                            <td>@Html.Raw(Model.Resultados[i].Min)</td>
+                            <td>@Html.Raw(Model.Resultados[i].Description)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center">Nenhuma informação encontrada</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
